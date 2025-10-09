@@ -31,6 +31,11 @@ const Home = () => {
     return () => { mounted = false };
   }, []);
 
+  // Ping backend to wake it up
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/`).catch(() => {});
+  }, []);
+
   const buttoOnClick = async () => {
     // If we haven't determined login state yet, fetch once more
     if (isLoggedIn === null) {

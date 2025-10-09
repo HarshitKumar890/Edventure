@@ -26,28 +26,31 @@ const SYSTEM_PROMPT = `You are ERA, the student's personal AI tutor in a gamifie
 
 // DeepSeek fallback
 async function callDeepSeek(userInput) {
-    const url = "https://api.deepseek.ai/v1/query"; // Confirm endpoint
+    const url = "https://api.deepseek.com/v1/chat/completions";
     const headers = {
         "Authorization": `Bearer ${DEEPSEEK_API_KEY}`,
         "Content-Type": "application/json"
     };
     const payload = {
-        "query": userInput,
-        "context": "Math tutoring for student"
+        "model": "deepseek-chat",
+        "messages": [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": userInput}
+        ],
+        "stream": false
     };
     try {
         const response = await axios.post(url, payload, { headers, timeout: 10000 });
-        const data = response.data;
-        const answer = data.answer || JSON.stringify(data);
-        return `ERA (DeepSeek fallback): ${answer}`;
+        const answer = response.data.choices[0].message.content;
+        return `ERA: ${answer}`;
     } catch (e) {
-        return `ERA fallback: Could not reach DeepSeek, focusing on your study goals 🎯! (Error: ${e.message})`;
+        return `'Sorry, I am unable to respond right now. Please try again later.'`;
     }
 }
 
 // Call Gemini
 async function callGemini(history) {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); // Use available model
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" }); // Updated to Gemini 2.5 Flash
     const chat = model.startChat({
         history: history.slice(0, -1), // Exclude the last user message for history
     });
